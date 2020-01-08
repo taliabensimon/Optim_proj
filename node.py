@@ -14,7 +14,6 @@ class Node():
         else:
             self.level = len(var_vals)
 
-
     def add_child(self,child):
         self.children.append(child)
 
