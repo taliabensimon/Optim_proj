@@ -1,4 +1,6 @@
-
+from Tree import Problem
+import copy
+import numpy as np
 
 class Node(object):
     def __init__(self, var_vals, problem, val=0):
@@ -36,8 +38,34 @@ class Node(object):
     def get_heuristic_val(self):
         return self.heuristic_val
 
-    def update_problem(self):
-        self.problem = 1  # todo
+    def update_problem(self, curr_problem):
+        var_count = len(curr_problem.func_coeff)
+        if self.is_final():  # if it's the last node
+            return np.dot(curr_problem.original_func_coeff, self.var_val)
+
+        func_coeff = np.zeros(var_count - self.var_val[self.level] + 1)
+        for i, coeff in enumerate(curr_problem.func_coeff[self.var_val[self.level] + 1]):
+            func_coeff[i] = coeff
+
+        const_coeff = []
+        const_bound = []
+        var_bound = []
+        for i, ct in enumerate(curr_problem.constraint_coeff):
+            var_val = ct[0] * self.var_val[self.level]
+            new_bound = curr_problem.constraint_bound[i] - var_val
+            if len(ct) > 2:
+                const_coeff.append([copy.deepcopy(ct[1:])])
+                const_bound.append(new_bound)
+            else:  # constraint becomes a variable bound
+                bound = copy.deepcopy(curr_problem.var_bounds[self.var_val[self.level] + 1])
+                if ct[1] < 0:  # sign changed => becomes a lower bound
+                    lower_bound = new_bound
+                    if bound[0] == None or abs(bound[0]) > abs(lower_bound):  # Update lower bound
+                        bound[0] = lower_bound
+                elif bound[1] == None or abs(bound[1]) > abs(new_bound):
+                    bound[1] = new_bound
+                var_bound.append(bound)
+        self.problem = Problem(curr_problem.opt_type, func_coeff, const_coeff, const_bound, var_bound, curr_problem.original_func_coeff)
 
     def get_problem(self):
         return self.problem
