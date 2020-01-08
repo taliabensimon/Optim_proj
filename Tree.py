@@ -28,8 +28,11 @@ class Problem(object):
         self.var_bounds = var_bounds
 
 
+class Tree(object):
+    def lp_node_value(self, problem):
+        result = scilp(problem.func_coeff, problem.constraint_coeff, problem.constraint_bound, problem.var_bounds)
+        return result
 
-def lp_node_value(problem):
-    result = scilp(problem.func_coeff, problem.constraint_coeff, problem.constraint_bound, problem.var_bounds)
-    return result
+    def GetNext(self):
+        pass
 
