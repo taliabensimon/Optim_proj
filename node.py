@@ -1,6 +1,6 @@
 
 
-class Node():
+class Node(object):
     def __init__(self, var_vals, problem, val=0):
         self.var_val = var_vals
         self.problem = problem

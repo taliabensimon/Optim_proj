@@ -1,5 +1,5 @@
 from heapq import *
 
-class BranchAndBound():
+class BranchAndBound(object):
     def __init__(self):
         self.priority_queue = []
