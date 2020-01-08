@@ -16,6 +16,6 @@ class Tree(object):
         result = scilp(problem.func_coeff, problem.constraint_coeff, problem.constraint_bound, problem.var_bounds)
         return result
 
-    def GetNext(self):
+    def get_next(self):
         pass
 
