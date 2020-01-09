@@ -15,6 +15,7 @@ class Node(object):
             self.level = [i for i, val in enumerate(var_vals) if val == None][0] +1
         else:
             self.level = len(var_vals)
+        self.not_valid = False
 
     def add_child(self,child):
         self.children.append(child)
@@ -40,8 +41,9 @@ class Node(object):
 
     def update_problem(self, curr_problem):
         var_count = len(curr_problem.func_coeff)
-        if self.is_final():  # if it's the last node
-            return np.dot(curr_problem.original_func_coeff, self.var_val)
+        if self.is_final() and not self.not_valid:  # if it's the last node
+            self.val = np.dot(curr_problem.original_func_coeff, self.var_val)
+            return self.val
 
         func_coeff = np.zeros(var_count - self.var_val[self.level] + 1)
         for i, coeff in enumerate(curr_problem.func_coeff[self.var_val[self.level] + 1]):
