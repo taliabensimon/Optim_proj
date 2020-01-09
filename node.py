@@ -11,7 +11,7 @@ class Node(object):
         self.heuristic_val = 0
         self.children = []
         self.is_final = None not in var_vals
-        if self.is_final:
+        if not self.is_final:
             self.level = [i for i, val in enumerate(var_vals) if val == None][0] +1
         else:
             self.level = len(var_vals)
@@ -71,7 +71,7 @@ class Node(object):
         return self.problem
 
     def is_final(self):
-        return self.is_final()
+        return self.is_final
 
     def get_level(self):
         return self.level
