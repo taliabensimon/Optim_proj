@@ -37,13 +37,20 @@ class BranchAndBound(Tree):
 
     def bbsolve(self):
         self.priority_queue.add(self.root)
-        jump = 0
+        temp = [i if i is not None else 0 for i in self.root.var_val.copy()]
+        jump = int("".join(map(str, temp)))
         while not self.priority_queue.is_empty():
             temp_best_node = self.priority_queue.get_item()
             self.node_searched.append(temp_best_node.var_val)
-            jump = abs(temp_best_node.level- jump) #todo - change to xsor between vars_val
+            temp = [i if i is not None else 0 for i in temp_best_node.var_val.copy()]
+            x = int("".join(map(str, temp)))
+            jump = int(x, 2) ^ int(jump, 2)
+            #jump = abs(temp_best_node.level- jump) #todo - change to xsor between vars_val
             self.jump_indicator[jump] = self.jump_indicator.get(jump, 0) + 1
-            jump = temp_best_node.level
+            temp = [i if i is not None else 0 for i in temp_best_node.var_val.copy()]
+            x = int("".join(map(str, temp)))
+            jump = x
+            #jump = temp_best_node.level
 
             if not temp_best_node.not_valid:
                 if temp_best_node.is_final:  # if a valid solution then this is the best
