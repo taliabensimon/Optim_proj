@@ -42,7 +42,7 @@ class Node(object):
     def update_problem(self, curr_problem):
         var_count = len(curr_problem.func_coeff)
         if self.is_final() and not self.not_valid:  # if it's the last node
-            self.val = np.dot(curr_problem.original_func_coeff, self.var_val)
+            self.val = np.dot(curr_problem.original_func_coeff, self.var_val)  #todo - still need to check if all bounds are meet
             return self.val
 
         func_coeff = np.zeros(var_count - self.var_val[self.level] + 1)
