@@ -1,4 +1,4 @@
-from Tree import Problem
+from problem import Problem
 import copy
 import numpy as np
 
