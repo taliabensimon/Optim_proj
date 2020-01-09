@@ -45,7 +45,7 @@ class BranchAndBound(Tree):
             temp = [i if i is not None else 0 for i in temp_best_node.var_val.copy()]
             x = int("".join(map(str, temp)))
             jump = int(x, 2) ^ int(jump, 2)
-            #jump = abs(temp_best_node.level- jump) #todo - change to xsor between vars_val
+            #jump = abs(temp_best_node.level- jump)
             self.jump_indicator[jump] = self.jump_indicator.get(jump, 0) + 1
             temp = [i if i is not None else 0 for i in temp_best_node.var_val.copy()]
             x = int("".join(map(str, temp)))
