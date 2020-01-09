@@ -1,4 +1,4 @@
-import scipy.optimize.linprog as scilp
+from scipy.optimize import linprog as scilp
 import enum
 from node import Node
 
@@ -24,7 +24,7 @@ class Tree(object):
         return result
 
     def get_children(self,node):
-        if node.is_final():
+        if node.is_final:
             return None
         prob = node.get_problem()
         vars_val = node.var_val.copy()

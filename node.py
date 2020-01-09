@@ -3,7 +3,7 @@ import copy
 import numpy as np
 
 class Node(object):
-    def __init__(self, var_vals, problem, val=0):
+    def __init__(self, var_vals, problem, val=None):
         self.var_val = var_vals
         self.problem = problem
         self.update_problem(problem)
@@ -71,9 +71,6 @@ class Node(object):
 
     def get_problem(self):
         return self.problem
-
-    def is_final(self):
-        return self.is_final
 
     def get_level(self):
         return self.level
