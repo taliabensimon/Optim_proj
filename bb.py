@@ -1,5 +1,5 @@
 from heapq import *
-from tree import Tree
+from tree import Tree, LPResult
 from node import Node
 import numpy as np
 
@@ -31,6 +31,10 @@ class BranchAndBound(Tree):
         self.jump_indicator = {}
         self.node_searched = []
 
+    def is_valid_solution(x):
+        #check if the solution contins only intergers
+        return all(np.equal(np.mod(x, 1), 0)) #not False in np.eq...
+
     def bbsolve(self):
         self.priority_queue.add(self.root)
         jump = 0
@@ -50,17 +54,17 @@ class BranchAndBound(Tree):
                         if new_node.is_final:
                             self.priority_queue.add(new_node)
                         else:
-                            val = self.lp_node_value(new_node) # todo - check res val
-                            if val not in ["infeasible", "unbounded"]:
-                                new_node.val = val
-                                if val is int:
+                            res = self.lp_node_value(new_node)
+                            if res['success']:#res[LPResult.SUCESS]
+                                new_node.val = res['fun'] #res[LPResult.FUNC_VAL]
+                                if self.is_valid_solution(res['x']):#res[LPResult.VAR_COEFF]
                                     new_node.is_final = True
-                                    new_node.var_val = val.res
+                                    new_node.var_val = res['x'] #res[LPResult.VAR_COEFF]
                                 self.priority_queue.add(new_node)
                             # else:
                             #     new_node.val = np.Infinity
                             #     new_node.is_final = True
                             #     new_node.not_valid = True
-                        #heappush(heap, (res, next(counter), new_node))  # using counter to avoid possible comparisons between nodes. It tie breaks
+                        # heappush(heap, (res, next(counter), new_node))  # using counter to avoid possible comparisons between nodes. It tie breaks
         # no solution for this problem
         return None, None, self.jump_indicator, self.node_searched
