@@ -45,21 +45,21 @@ class Node(object):
             self.val = np.dot(curr_problem.original_func_coeff, self.var_val)  #todo - still need to check if all bounds are meet
             return self.val
 
-        func_coeff = np.zeros(var_count - self.var_val[self.level] + 1)
-        for i, coeff in enumerate(curr_problem.func_coeff[self.var_val[self.level] + 1]):
+        func_coeff = np.zeros(var_count - self.self.level)
+        for i, coeff in enumerate(curr_problem.func_coeff[self.level:]):#copy only coeff. from the next var and on
             func_coeff[i] = coeff
 
         const_coeff = []
         const_bound = []
         var_bound = []
         for i, ct in enumerate(curr_problem.constraint_coeff):
-            var_val = ct[0] * self.var_val[self.level]
+            var_val = ct[0] * self.var_val[self.level-1] # assign current variable it's value*it's coeff
             new_bound = curr_problem.constraint_bound[i] - var_val
             if len(ct) > 2:
                 const_coeff.append([copy.deepcopy(ct[1:])])
                 const_bound.append(new_bound)
             else:  # constraint becomes a variable bound
-                bound = copy.deepcopy(curr_problem.var_bounds[self.var_val[self.level] + 1])
+                bound = copy.deepcopy(curr_problem.var_bounds[self.level])
                 if ct[1] < 0:  # sign changed => becomes a lower bound
                     lower_bound = new_bound
                     if bound[0] == None or abs(bound[0]) > abs(lower_bound):  # Update lower bound
