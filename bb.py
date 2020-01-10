@@ -62,7 +62,7 @@ class BranchAndBound(Tree):
                         if new_node.is_final:
                             self.priority_queue.add(new_node)
                         else:
-                            res = self.lp_node_value(new_node)
+                            res = self.lp_node_value(new_node.get_problem())
                             if res['success']:#res[LPResult.SUCESS]
                                 new_node.val = res['fun'] #res[LPResult.FUNC_VAL]
                                 if self.is_valid_solution(res['x']):#res[LPResult.VAR_COEFF]
