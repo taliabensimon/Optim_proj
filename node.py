@@ -46,7 +46,7 @@ class Node(object):
             self.val = np.dot(curr_problem.original_func_coeff, self.var_val)  #todo - still need to check if all bounds are meet
             return self.val
 
-        func_coeff = np.zeros(var_count - self.self.level)
+        func_coeff = np.zeros(var_count - self.level)
         for i, coeff in enumerate(curr_problem.func_coeff[self.level:]):#copy only coeff. from the next var and on
             func_coeff[i] = coeff
 
