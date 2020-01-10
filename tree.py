@@ -1,6 +1,7 @@
 from scipy.optimize import linprog as scilp
 import enum
 from node import Node
+import copy
 
 class LPResult(enum.Enum):
     VAR_COEFF = 0,
@@ -26,12 +27,13 @@ class Tree(object):
     def get_children(self,node):
         if node.is_final:
             return None
-        prob = node.get_problem()
+        prob1 = copy.deepcopy(node.get_problem())
+        prob2 = copy.deepcopy(node.get_problem())
         vars_val_l = node.var_val.copy()
         vars_val_r = node.var_val.copy()
         vars_val_l[node.level] = 1
-        left_n = Node(vars_val_l, prob)
+        left_n = Node(vars_val_l, prob1)
         vars_val_r[node.level] = 0
-        right_n = Node(vars_val_r, prob)
+        right_n = Node(vars_val_r, prob2)
         return left_n, right_n
 
