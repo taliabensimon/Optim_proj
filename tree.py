@@ -20,7 +20,7 @@ class Tree(object):
         self.root = Node(vars_val, problem, self.best_possible_val)
 
     def lp_node_value(self, problem):
-        result = scilp(problem.func_coeff, problem.constraint_coeff, problem.constraint_bound, problem.var_bounds)
+        result = scilp(problem.func_coeff,A_ub = problem.constraint_coeff,b_ub = problem.constraint_bound, bounds = problem.var_bounds)
         return result
 
     def get_children(self,node):

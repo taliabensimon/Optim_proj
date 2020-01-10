@@ -41,10 +41,10 @@ class BinaryIntegerProgramming(Tree):
             self.curr.val = -np.inf
             self.curr.not_valid = True
         res = self.lp_node_value(self.curr.problem)
-        if not res[LPResult.SUCESS]:
+        if not res.success:
             self.curr.val = -np.inf
             self.curr.is_valid = False
-        return res[LPResult.FUNC_VAL] if res[LPResult.SUCESS] == True else -np.inf
+        return res.fun if res.success == True else -np.inf
 
 
 class Action():
