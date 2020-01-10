@@ -68,7 +68,7 @@ class Node(object):
                         bound[0] = lower_bound
                 elif bound[1] == None or abs(bound[1]) > abs(new_bound):
                     bound[1] = new_bound
-                var_bound[-1] = new_bound
+                var_bound[-1] = new_bound # only when the last variable left a constraint becomes a bound
 
         self.problem = Problem(curr_problem.opt_type, func_coeff, const_coeff, const_bound, var_bound, curr_problem.original_func_coeff)
 
