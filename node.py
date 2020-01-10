@@ -52,12 +52,13 @@ class Node(object):
 
         const_coeff = []
         const_bound = []
-        var_bound = []
+        var_bound = copy.deepcopy(curr_problem.var_bounds[self.level:])
+
         for i, ct in enumerate(curr_problem.constraint_coeff):
             var_val = ct[0] * self.var_val[self.level-1] # assign current variable it's value*it's coeff
             new_bound = curr_problem.constraint_bound[i] - var_val
             if len(ct) > 2:
-                const_coeff.append([copy.deepcopy(ct[1:])])
+                const_coeff.append(copy.deepcopy(ct[1:]))
                 const_bound.append(new_bound)
             else:  # constraint becomes a variable bound
                 bound = copy.deepcopy(curr_problem.var_bounds[self.level])
@@ -67,7 +68,8 @@ class Node(object):
                         bound[0] = lower_bound
                 elif bound[1] == None or abs(bound[1]) > abs(new_bound):
                     bound[1] = new_bound
-                var_bound.append(bound)
+                var_bound[-1] = new_bound
+
         self.problem = Problem(curr_problem.opt_type, func_coeff, const_coeff, const_bound, var_bound, curr_problem.original_func_coeff)
 
     def get_problem(self):
