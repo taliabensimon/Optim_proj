@@ -1,5 +1,5 @@
 from copy import deepcopy
-from mcts import mcts
+from monte_carlo import mcts
 from tree import Tree,LPResult
 import numpy as np
 

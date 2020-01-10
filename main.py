@@ -3,6 +3,7 @@ from problem import Problem, OptType
 from bip_state import BinaryIntegerProgramming as BIP
 from monte_carlo import mcts
 from node import Node
+from  bb import BranchAndBound
 
 def problem_page_35():
     #page 35
@@ -11,6 +12,12 @@ def problem_page_35():
     const_coeff = [[6,3,5,2], [0,0,1,1],[-1,0,1,0],[0,-1,0,1]]
     const_bound = [10,1,0,0]
     root = Problem(OptType.MIN, func_coeff, const_coeff, const_bound, var_bounds, func_coeff)
+
+    b_b = BranchAndBound(root)
+    res = b_b.bbsolve()
+    print(f'solution value: {res[0]}, vars_solution: {res[1]}')
+    print(f'node searched: {res[3]}')
+    print(f'jumps: {res[2]}')
 
 def problem_mission_impossible():
     '''

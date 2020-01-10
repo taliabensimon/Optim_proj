@@ -6,16 +6,17 @@ class Node(object):
     def __init__(self, var_vals, problem, val=None):
         self.var_val = var_vals
         self.problem = problem
-        self.update_problem(problem)
         self.val = val
         self.heuristic_val = 0
         self.children = []
         self.is_final = None not in var_vals
         if not self.is_final:
-            self.level = [i for i, val in enumerate(var_vals) if val == None][0] +1
+            self.level = [i for i, val in enumerate(var_vals) if val == None][0]
         else:
             self.level = len(var_vals)
         self.not_valid = False
+        if self.level >0:
+            self.update_problem(problem)
 
     def add_child(self,child):
         self.children.append(child)
@@ -41,7 +42,7 @@ class Node(object):
 
     def update_problem(self, curr_problem):
         var_count = len(curr_problem.func_coeff)
-        if self.is_final() and not self.not_valid:  # if it's the last node
+        if self.is_final and not self.not_valid:  # if it's the last node
             self.val = np.dot(curr_problem.original_func_coeff, self.var_val)  #todo - still need to check if all bounds are meet
             return self.val
 

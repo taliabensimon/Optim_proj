@@ -11,7 +11,7 @@ class MaxHeap(object):
 
     def add(self,data):
         #for i in data:
-        item = (-data.val, data)
+        item = (-data.val['fun'], data)
         heappush(self.priority_queue, item)
 
     def get_item(self):
@@ -26,7 +26,8 @@ class MaxHeap(object):
 
 
 class BranchAndBound(Tree):
-    def __init__(self):
+    def __init__(self,problem):
+        super(BranchAndBound, self).__init__(problem)
         self.priority_queue = MaxHeap()
         self.jump_indicator = {}
         self.node_searched = []
@@ -38,17 +39,17 @@ class BranchAndBound(Tree):
     def bbsolve(self):
         self.priority_queue.add(self.root)
         temp = [i if i is not None else 0 for i in self.root.var_val.copy()]
-        jump = int("".join(map(str, temp)))
+        jump = "".join(map(str, temp))
         while not self.priority_queue.is_empty():
             temp_best_node = self.priority_queue.get_item()
             self.node_searched.append(temp_best_node.var_val)
             temp = [i if i is not None else 0 for i in temp_best_node.var_val.copy()]
-            x = int("".join(map(str, temp)))
+            x = "".join(map(str, temp))
             jump = int(x, 2) ^ int(jump, 2)
             #jump = abs(temp_best_node.level- jump)
             self.jump_indicator[jump] = self.jump_indicator.get(jump, 0) + 1
             temp = [i if i is not None else 0 for i in temp_best_node.var_val.copy()]
-            x = int("".join(map(str, temp)))
+            x = "".join(map(str, temp))
             jump = x
             #jump = temp_best_node.level
 
