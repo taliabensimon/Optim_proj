@@ -16,7 +16,7 @@ class LPResult(enum.Enum):
 class Tree(object):
     def __init__(self,problem):
         vars_val = [None] * len(problem.func_coeff)
-        self.best_possible_val = self.lp_node_value(problem)
+        self.best_possible_val = self.lp_node_value(problem)['fun']
         self.root = Node(vars_val, problem, self.best_possible_val)
 
     def lp_node_value(self, problem):
@@ -27,10 +27,11 @@ class Tree(object):
         if node.is_final:
             return None
         prob = node.get_problem()
-        vars_val = node.var_val.copy()
-        vars_val[node.level] = 1
-        left_n = Node(vars_val, prob)
-        vars_val[node.level] = 0
-        right_n = Node(vars_val, prob)
+        vars_val_l = node.var_val.copy()
+        vars_val_r = node.var_val.copy()
+        vars_val_l[node.level] = 1
+        left_n = Node(vars_val_l, prob)
+        vars_val_r[node.level] = 0
+        right_n = Node(vars_val_r, prob)
         return left_n, right_n
 

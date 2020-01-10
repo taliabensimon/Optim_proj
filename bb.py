@@ -11,7 +11,7 @@ class MaxHeap(object):
 
     def add(self,data):
         #for i in data:
-        item = (-data.val['fun'], data)
+        item = (-data.val, data)
         heappush(self.priority_queue, item)
 
     def get_item(self):
@@ -32,7 +32,7 @@ class BranchAndBound(Tree):
         self.jump_indicator = {}
         self.node_searched = []
 
-    def is_valid_solution(x):
+    def is_valid_solution(self, x):
         #check if the solution contins only intergers
         return all(np.equal(np.mod(x, 1), 0)) #not False in np.eq...
 
@@ -42,6 +42,7 @@ class BranchAndBound(Tree):
         jump = "".join(map(str, temp))
         while not self.priority_queue.is_empty():
             temp_best_node = self.priority_queue.get_item()
+            print(temp_best_node.var_val)
             self.node_searched.append(temp_best_node.var_val)
             temp = [i if i is not None else 0 for i in temp_best_node.var_val.copy()]
             x = "".join(map(str, temp))
