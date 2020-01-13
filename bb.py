@@ -70,7 +70,11 @@ class BranchAndBound(Tree):
                                 new_node.val = res['fun'] #res[LPResult.FUNC_VAL]
                                 if self.is_valid_solution(res['x']):#res[LPResult.VAR_COEFF]
                                     new_node.is_final = True
-                                    new_node.var_val = res['x'] #res[LPResult.VAR_COEFF]
+                                    print(f'var val {new_node.var_val}')
+                                    for i,v in enumerate(res['x']):
+                                        new_node.var_val[i+new_node.level] = int(v)
+                                    print(f'new var val {new_node.var_val}')
+                                    #new_node.var_val = res['x'] #res[LPResult.VAR_COEFF]
                                 self.priority_queue.add(new_node,num)
                                 num += 1
                             # else:
