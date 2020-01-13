@@ -41,10 +41,13 @@ class Node(object):
         return self.heuristic_val
 
     def update_problem(self, curr_problem):
-        var_count = len(curr_problem.func_coeff)
-        if self.is_final and not self.not_valid:  # if it's the last node
-            self.val = np.dot(curr_problem.original_func_coeff, self.var_val)  #todo - still need to check if all bounds are meet
-            return self.val
+        if self.is_final and not self.not_valid: # if it's the last node and it's valid
+            if self.var_val[-1] <= curr_problem.var_bounds[0][1] and self.var_val[-1] >= curr_problem.var_bounds[0][0]:
+                self.val = np.dot(curr_problem.original_func_coeff, self.var_val)  #todo - still need to check if all bounds are meet
+            else:
+                self.not_valid = True
+                self.is_final = True
+                self.val = -np.inf
 
         func_coeff = copy.deepcopy(curr_problem.func_coeff[1:])#copy only coeff. from the next var and on
         var_bound = copy.deepcopy(curr_problem.var_bounds[1:])
