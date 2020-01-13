@@ -9,15 +9,14 @@ class MaxHeap(object):
     def __init__(self):
         self.priority_queue = []
 
-    def add(self,data):
-        #for i in data:
-        item = (-data.val, data)
+    def add(self,data,num):
+        item = (-data.val, num, data)
         heappush(self.priority_queue, item)
 
     def get_item(self):
         if len(self.priority_queue) == 0:
             return None
-        return heappop(self.priority_queue)[1]
+        return heappop(self.priority_queue)[2]
 
     def is_empty(self):
         if len(self.priority_queue) == 0:
@@ -37,7 +36,9 @@ class BranchAndBound(Tree):
         return all(np.equal(np.mod(x, 1), 0)) #not False in np.eq...
 
     def bbsolve(self):
-        self.priority_queue.add(self.root)
+        num = 0
+        self.priority_queue.add(self.root,num)
+        num += 1
         temp = [i if i is not None else 0 for i in self.root.var_val.copy()]
         jump = "".join(map(str, temp))
         while not self.priority_queue.is_empty():
@@ -61,7 +62,8 @@ class BranchAndBound(Tree):
                     new_nodes = self.get_children(temp_best_node)
                     for new_node in new_nodes:
                         if new_node.is_final:
-                            self.priority_queue.add(new_node)
+                            self.priority_queue.add(new_node,num)
+                            num += 1
                         else:
                             res = self.lp_node_value(new_node.get_problem())
                             if res['success']:#res[LPResult.SUCESS]
@@ -69,7 +71,8 @@ class BranchAndBound(Tree):
                                 if self.is_valid_solution(res['x']):#res[LPResult.VAR_COEFF]
                                     new_node.is_final = True
                                     new_node.var_val = res['x'] #res[LPResult.VAR_COEFF]
-                                self.priority_queue.add(new_node)
+                                self.priority_queue.add(new_node,num)
+                                num += 1
                             # else:
                             #     new_node.val = np.Infinity
                             #     new_node.is_final = True
