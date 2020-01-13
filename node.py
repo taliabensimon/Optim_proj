@@ -40,14 +40,20 @@ class Node(object):
     def get_heuristic_val(self):
         return self.heuristic_val
 
+    def is_var_in_bounds(self, value, bound):
+        return value <= bound[1] and value >= bound[0]
+
+    def set_not_valid(self):
+        self.not_valid = True
+        self.is_final = True
+        self.val = -np.inf
+
     def update_problem(self, curr_problem):
         if self.is_final and not self.not_valid: # if it's the last node and it's valid
-            if self.var_val[-1] <= curr_problem.var_bounds[0][1] and self.var_val[-1] >= curr_problem.var_bounds[0][0]:
-                self.val = np.dot(curr_problem.original_func_coeff, self.var_val)  #todo - still need to check if all bounds are meet
+            if self.is_var_in_bounds(self.var_val[-1], curr_problem.var_bounds[0]):
+                self.val = np.dot(curr_problem.original_func_coeff, self.var_val)
             else:
-                self.not_valid = True
-                self.is_final = True
-                self.val = -np.inf
+                self.set_not_valid()
 
         func_coeff = copy.deepcopy(curr_problem.func_coeff[1:])#copy only coeff. from the next var and on
         var_bound = copy.deepcopy(curr_problem.var_bounds[1:])
@@ -63,12 +69,15 @@ class Node(object):
                 const_bound.append(new_bound)
             else:  # constraint becomes a variable bound
                 bound = list(var_bound[0])
+                if ct[1] == 0:
+                    if var_val > curr_problem.constraint_bound[i]:
+                          self.set_not_valid()
+                    else:
+                        continue
                 new_bound /= ct[1]
 
-                if new_bound > bound[1] or new_bound < bound[0]:
-                    self.not_valid = True
-                    self.is_final = True
-                    self.val = -np.inf
+                if (ct[1] < 0 and new_bound > bound[1]) or new_bound < bound[0]:
+                    self.set_not_valid()
                     break
                 elif ct[1] < 0:  # sign changed => becomes a lower bound
                     lower_bound = new_bound

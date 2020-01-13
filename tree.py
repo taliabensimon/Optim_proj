@@ -25,12 +25,12 @@ class Tree(object):
         result = scilp(problem.func_coeff,A_ub = problem.constraint_coeff,b_ub = problem.constraint_bound, bounds = problem.var_bounds)
         return result
 
-    def get_lp_addition(self, var_vals, level, problem, ):
+    def get_lp_addition(self, var_vals, level, problem):
         addition = np.dot(var_vals[:level], problem.original_func_coeff[:level])
-        result = self.lp_node_value(problem)
+        result = copy.deepcopy(self.lp_node_value(problem))
         if result["success"]:
-            result["fun"] += addition
-        return result
+            val = result["fun"] + addition
+        return result,val
 
     def get_children(self,node):
         if node.is_final:

@@ -10,7 +10,7 @@ class MaxHeap(object):
         self.priority_queue = []
 
     def add(self,data,num):
-        item = (-data.val, num, data)
+        item = (data.val, num, data)
         heappush(self.priority_queue, item)
 
     def get_item(self):
@@ -65,9 +65,9 @@ class BranchAndBound(Tree):
                             self.priority_queue.add(new_node,num)
                             num += 1
                         else:
-                            res = self.lp_node_value(new_node.get_problem())
+                            res,new_val = self.get_lp_addition(new_node.var_val, new_node.level, new_node.get_problem())#self.lp_node_value(new_node.get_problem())
                             if res['success']:#res[LPResult.SUCESS]
-                                new_node.val = res['fun'] #res[LPResult.FUNC_VAL]
+                                new_node.val = new_val#res['fun'] #res[LPResult.FUNC_VAL]
                                 if self.is_valid_solution(res['x']):#res[LPResult.VAR_COEFF]
                                     new_node.is_final = True
                                     print(f'var val {new_node.var_val}')
