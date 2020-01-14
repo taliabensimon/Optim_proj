@@ -27,10 +27,10 @@ class Tree(object):
 
     def get_lp_addition(self, var_vals, level, problem):
         addition = np.dot(var_vals[:level], problem.original_func_coeff[:level])
-        result = self.lp_node_value(problem)
+        result = copy.deepcopy(self.lp_node_value(problem))
         if result["success"]:
-            result["fun"] += addition
-        return result
+            val = result["fun"] + addition
+        return result,val
 
     def get_children(self,node):
         if node.is_final:
