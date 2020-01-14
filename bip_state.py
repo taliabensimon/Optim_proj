@@ -40,11 +40,11 @@ class BinaryIntegerProgramming(Tree):
         if len(self.curr.get_children()) > 0 and not self.has_valid_child():
             self.curr.val = -np.inf
             self.curr.not_valid = True
-        res = self.lp_node_value(self.curr.problem)
-        if not res.success:
+        res, val = self.get_lp_addition(self.curr.var_vals, self.curr.level, self.curr.problem)
+        if not res["success"]:
             self.curr.val = -np.inf
             self.curr.is_valid = False
-        return res.fun if res.success == True else -np.inf
+        return val if res["success"] else -np.inf
 
 
 class Action():
