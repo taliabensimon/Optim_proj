@@ -22,10 +22,12 @@ class Tree(object):
         self.root = Node(vars_val, problem, self.best_possible_val)
 
     def lp_node_value(self, problem):
-        result = scilp(problem.func_coeff,A_ub = problem.constraint_coeff,b_ub = problem.constraint_bound, bounds = problem.var_bounds)
+        const_coeff = problem.constraint_coeff if len(problem.constraint_coeff) > 0 else None
+        result = scilp(problem.func_coeff,A_ub = const_coeff,b_ub = problem.constraint_bound, bounds = problem.var_bounds)
         return result
 
     def get_lp_addition(self, var_vals, level, problem):
+        val = np.Infinity
         addition = np.dot(var_vals[:level], problem.original_func_coeff[:level])
         result = copy.deepcopy(self.lp_node_value(problem))
         if result["success"]:

@@ -72,6 +72,7 @@ class Node(object):
                 if ct[1] == 0:
                     if var_val > curr_problem.constraint_bound[i]:
                           self.set_not_valid()
+                          break
                     else:
                         continue
                 new_bound /= ct[1]
@@ -87,7 +88,8 @@ class Node(object):
                 elif bound[1] == None or abs(bound[1]) > abs(new_bound):
                     bound[1] = new_bound
                 var_bound[-1] = tuple(bound) # only when the last variable left a constraint becomes a bound
-
+        # if len(const_coeff) == 0:
+        #     self.is_final = True
         self.problem = Problem(curr_problem.opt_type, func_coeff, const_coeff, const_bound, var_bound, curr_problem.original_func_coeff)
 
     def get_problem(self):
