@@ -15,19 +15,32 @@ if __name__ == '__main__':
             num_vars, num_consts, opt_sol = np.array(problem[0].split(" "), dtype=float)
             if opt_sol == 0: # indicates that solution is unavailable
                 continue
-            func_coeff = np.array(problem[1].split(" "), dtype=float)*-1
+
+            i = 1
+            func_coeff = np.array(problem[i].split(" "), dtype=float)*-1
+            while len(func_coeff) < num_vars:
+                i+=1
+                func_coeff = np.concatenate((func_coeff, np.array(problem[i].split(" "), dtype=float) * -1))
+            i+=1
             var_bound = [(0,1) for f in range(len(func_coeff))]
 
-            const_coeff = []
+            const_coeffs = []
             const_bound = []
+            j = i
+            for _ in range(i,i+int(num_consts)):
+                const_coeff = np.array(problem[j].split(" "), dtype=float)
 
-            for i in range(2,2+int(num_consts)):
-                const_coeff.append(np.array(problem[i].split(" "), dtype=float))
+                while len(const_coeff) < num_vars:
+                    j+=1
+                    const_coeff = np.concatenate((const_coeff, np.array(problem[j].split(" "), dtype=float)))
+                j+=1
+                const_coeffs.append(const_coeff)
 
-            assert len(const_coeff) == int(num_consts)
-            const_bound = np.array(problem[2+int(num_consts)].split(" "), dtype=float)
-            problems.append(Problem(OptType.MIN, func_coeff, const_coeff, const_bound, var_bound, func_coeff))
-    with open("problems_pickle", "wb") as f:
+
+            assert len(const_coeffs) == int(num_consts)
+            const_bound = np.array(problem[j].split(" "), dtype=float)
+            problems.append(Problem(OptType.MIN, func_coeff, const_coeffs, const_bound, var_bound, func_coeff))
+    with open("problems_pickle_v2", "wb") as f:
         pickle.dump(problems, f)
 
 
