@@ -4,6 +4,7 @@ from bip_state import BinaryIntegerProgramming as BIP
 from monte_carlo import mcts
 from node import Node
 from  bb import BranchAndBound
+import pickle
 
 def problem_page_35():
     #page 35
@@ -42,4 +43,15 @@ def problem_mission_impossible():
 
 if __name__ == '__main__':
     # problem_mission_impossible()
-    problem_page_35()
+    #problem_page_35()
+    with open("problems_pickle",'rb') as f:
+        problems_arr = pickle.load(f)
+    for i,p in enumerate(problems_arr):
+        if i <=2:
+            continue
+        print('_______________________________________________________\n\n\n\n')
+        b_b = BranchAndBound(p)
+        res = b_b.bbsolve()
+        print(f'solution value: {res[0]}, vars_solution: {res[1]}')
+        print(f'node searched: {res[3]}')
+        print(f'jumps: {res[2]}')
