@@ -7,7 +7,7 @@ class Node(object):
         self.var_val = var_vals
         self.problem = problem
         self.val = val
-        self.heuristic_val = 0
+        self.h_val = None
         self.children = []
         self.is_final = None not in var_vals
         if not self.is_final:
@@ -22,10 +22,26 @@ class Node(object):
         self.children.append(child)
 
     def add_children(self,children):
-        for child in children:
-            self.add_child(child)
+        self.children.extend(children)
+
+    def eval_children(self):
+        if self.is_final:
+            return None
+        prob1 = copy.deepcopy(self.get_problem())
+        prob2 = copy.deepcopy(self.get_problem())
+        vars_val_l = self.var_val.copy()
+        vars_val_r = self.var_val.copy()
+        vars_val_l[self.level] = 1
+        left_n = Node(vars_val_l, prob1)
+        vars_val_r[self.level] = 0
+        right_n = Node(vars_val_r, prob2)
+        self.add_children([left_n, right_n])
+        return left_n, right_n
 
     def get_children(self):
+        if len(self.children) == 0:
+            self.eval_children()
+        assert len(self.children) <= 2
         return self.children
 
     def set_val(self, val):

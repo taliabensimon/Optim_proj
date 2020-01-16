@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
             assert len(const_coeffs) == int(num_consts)
             const_bound = np.array(problem[j].split(" "), dtype=float)
-            problems.append(Problem(OptType.MIN, func_coeff, const_coeffs, const_bound, var_bound, func_coeff))
+            problems.append((Problem(OptType.MIN, func_coeff, const_coeffs, const_bound, var_bound, func_coeff), opt_sol))
     with open("problems_pickle_v2", "wb") as f:
         pickle.dump(problems, f)
 

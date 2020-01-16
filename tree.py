@@ -37,6 +37,8 @@ class Tree(object):
     def get_children(self,node):
         if node.is_final:
             return None
+        if len(node.children) > 0:
+            return node.children
         prob1 = copy.deepcopy(node.get_problem())
         prob2 = copy.deepcopy(node.get_problem())
         vars_val_l = node.var_val.copy()
@@ -45,5 +47,6 @@ class Tree(object):
         left_n = Node(vars_val_l, prob1)
         vars_val_r[node.level] = 0
         right_n = Node(vars_val_r, prob2)
+        node.add_children([left_n, right_n])
         return left_n, right_n
 

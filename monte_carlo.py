@@ -16,12 +16,14 @@ def randomPolicy(state):
 class treeNode():
     def __init__(self, state, parent):
         self.state = state
-        self.isTerminal = state.isTerminal()
-        self.isFullyExpanded = self.isTerminal
+        self.isFullyExpanded = self.is_terminal()
         self.parent = parent
         self.num_visits = 0
         self.total_reward = 0
         self.children = {}
+
+    def is_terminal(self):
+        return self.state.isTerminal()
 
 
 class mcts():
@@ -61,11 +63,15 @@ class mcts():
 
     def executeRound(self):
         node = self.selectNode(self.root)
+        print(f"rolling state {node.state.curr.var_val}")
         reward = self.rollout(node.state)
+        print(f"reward {reward}")
         self.backpropogate(node, reward)
 
     def selectNode(self, node):
-        while not node.isTerminal:
+        i=0
+        while not node.is_terminal():
+            i+=1
             if node.isFullyExpanded:
                 node = self.get_best_child(node, self.explorationConstant)
             else:
@@ -74,25 +80,43 @@ class mcts():
 
     def expand(self, node):
         actions = node.state.getPossibleActions()
+
         for action in actions:
             if action not in node.children:
                 newNode = treeNode(node.state.takeAction(action), node)
                 node.children[action] = newNode
+                print(f"added {newNode.state.curr.val}")
                 if len(actions) == len(node.children):
+                #if len(actions) == node.state.get_num_explored_valid_children():
                     node.isFullyExpanded = True
                 return newNode
-
+        # print(f"in children, node terminal {node.is_terminal()}")
+        # print("EXCEPT")
         raise Exception("Should never reach here")
 
     def backpropogate(self, node, reward):
+        # print("IN BP")
         while node is not None:
             node.num_visits += 1
+            # print(reward)
             if reward != -np.inf:
-                node.total_reward += reward
-            elif not node.state.has_valid_child():
-                node.state.curr.not_valid = True
-                node.state.curr.val = -np.inf
-                node.total_reward = -np.inf
+                #node.total_reward += reward
+                node.total_reward = min(reward, node.total_reward)
+            else:
+                if not node.state.has_valid_child():
+                    # print("IN NO VALID CHILD")
+                    # print(f"node terminal {node.is_terminal()}")
+                    node.state.curr.not_valid = True
+                    node.isFullyExpanded = True
+                    node.state.curr.val = -np.inf
+                    node.total_reward = -np.inf
+                else:
+                    k_to_remove = None
+                    for (k,v) in node.children.items():
+                        if v.state.curr.not_valid:
+                            k_to_remove = k
+                            break
+                    node.children = {key: val for key, val in node.children.items() if key != k_to_remove}
             node = node.parent
 
     def get_best_child(self, node, explorationValue):
@@ -106,11 +130,14 @@ class mcts():
         for child in node.children.values():
             if child.total_reward == -np.inf:
                 continue
-            nodeValue = child.total_reward / child.num_visits + explorationValue * math.sqrt(
-                2 * math.log(node.num_visits) / child.num_visits)
+            h_val = child.state.curr.h_val if child.state.curr.h_val is not None else 0
+            # nodeValue = (child.total_reward + h_val/2) / child.num_visits + explorationValue * math.sqrt(2 * math.log(node.num_visits) / child.num_visits)
+            nodeValue = (child.total_reward + h_val / 2)/child.num_visits #+ explorationValue * math.sqrt(
+                #2 * math.log(node.num_visits) / child.num_visits)
             if nodeValue < bestValue:
                 bestValue = nodeValue
                 bestNodes = [child]
             elif nodeValue == bestValue:
                 bestNodes.append(child)
-        return random.choice(bestNodes)
+        best_node = random.choice(bestNodes)
+        return best_node
