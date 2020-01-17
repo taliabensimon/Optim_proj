@@ -57,8 +57,6 @@ class mcts():
             for i in range(self.searchLimit):
                 self.executeRound()
         bestChild = self.get_best_child(self.root, 0)
-        while len(bestChild.children) > 0:
-            bestChild = self.get_best_child(bestChild, 0)
         return bestChild
 
     def executeRound(self):
