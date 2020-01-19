@@ -51,9 +51,12 @@ class BranchAndBound(Tree):
             if jump1 == -1:
                 jump1 = 0
             else:
-                jump1 = min_level - jump1  # if brathers =1 and father and sun = 1 then add -1
+                jump1 = min_level -1 - jump1  # if brathers =2 and father and sun = 1 then remove -1
                 jump1 = 2 ** jump1
-            test_temp = jump1 + level_diff
+            if jump1 == 0 and level_diff == 1: # father to sun = 0
+                test_temp = 0
+            else:
+                test_temp = jump1 + level_diff
             self.jump_indicator[test_temp] = self.jump_indicator.get(test_temp, 0) + 1
 
     def bbsolve(self):
