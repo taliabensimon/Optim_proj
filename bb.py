@@ -28,6 +28,8 @@ class MaxHeap(object):
 class BranchAndBound(Tree):
     def __init__(self,problem,limiType=None,limit=None):
         super(BranchAndBound, self).__init__(problem)
+        if self.best_possible_val is None:
+            self.root.set_not_valid()
         self.priority_queue = MaxHeap()
         self.jump_indicator = {}
         self.node_searched = []

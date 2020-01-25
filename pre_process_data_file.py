@@ -12,8 +12,8 @@ def mknap1():
             continue
         problem = problem.strip().split("\n ")
         num_vars, num_consts, opt_sol = np.array(problem[0].split(" "), dtype=float)
-        if opt_sol == 0:  # indicates that solution is unavailable
-            continue
+        # if opt_sol == 0:  # indicates that solution is unavailable
+        #     continue
 
         i = 1
         func_coeff = np.array(problem[i].split(" "), dtype=float) * -1
@@ -89,7 +89,7 @@ def mknapcb():
 
 
 if __name__ == '__main__':
-    # mknap1()
-    mknapcb()
+    mknap1()
+    #mknapcb()
 
 

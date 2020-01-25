@@ -10,9 +10,9 @@ import numpy as np
 def call_bb(p):
     b_b = BranchAndBound(p)
     res = b_b.bbsolve()
-    # print(f'solution value: {res[0]}, vars_solution: {res[1]}')
-    # print(f'node searched: {res[3]}')
-    # print(f'jumps: {res[2]}')
+    print(f'solution value: {res[0]}, vars_solution: {res[1]}')
+    print(f'num node searched: {len(res[3])}, node searched: {res[3]}')
+    print(f'jumps: {res[2]}')
 
 def problem_page_35():
     #page 35
@@ -59,18 +59,20 @@ if __name__ == '__main__':
     with open("problems_pickle_v2",'rb') as f:
         problems_arr = pickle.load(f)
     for i,(p,v) in enumerate(problems_arr):
-
+        if i<7:
+            continue
         # b_b = BranchAndBound(p)
         # res = b_b.bbsolve()
+        call_bb(p)
         print('_______________________________________________________\n\n\n\n')
-        vars_val = [None] * len(p.func_coeff)
-        root = Node(vars_val, p)
-        bip = BIP(root,None)
-        mc = mcts(iterationLimit=len(p.func_coeff)*200)
-        res = mc.search(bip)
-        print(res.total_reward)
-        print(f'problem {i+1} solution is {v} mc solution is {res.total_reward}')
-        break
+        # vars_val = [None] * len(p.func_coeff)
+        # root = Node(vars_val, p)
+        # bip = BIP(root,None)
+        # mc = mcts(iterationLimit=len(p.func_coeff)*200)
+        # res = mc.search(bip)
+        # print(res.total_reward)
+        # print(f'problem {i+1} solution is {v} mc solution is {res.total_reward}')
+        #break
     # p = problems_arr[-1]
     # sol = [0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1]
     # for i, c in enumerate(p.constraint_coeff):
