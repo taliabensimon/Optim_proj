@@ -2,6 +2,12 @@ import time
 import math
 import random
 import numpy as np
+import enum
+
+class LimitType(enum.Enum):
+    time = 0,
+    turn = 1,
+    unbounded = 2
 
 def randomPolicy(state):
     visits = 1
@@ -38,9 +44,9 @@ def weighted_policy(state):
                     val2 = possible_actions[1].node.h_val
                     if val1 is not None and val2 is not None:
                         if val2 > val1:
-                            prob_rate =[0.8,0.2]
+                            prob_rate =[0.6,0.4]
                         elif val2 < val1:
-                            prob_rate = [0.2,0.8]
+                            prob_rate = [0.4,0.6]
                     elif (val1 is not None and val2 is None ):
                         prob_rate = [0.2,0.8]
                     elif (val2 is not None and val1 is None ):
@@ -79,61 +85,88 @@ class treeNode():
 
 
 class mcts():
-    def __init__(self, timeLimit=None, iterationLimit=None, explorationConstant=1 / math.sqrt(2),
+    def __init__(self, solution, limit_arr = None, limit_type = 2, explorationConstant=1 / math.sqrt(2),
                  rolloutPolicy=randomPolicy):
+        self.max_lvl = 0
+        self.total_visits = 0
         self.rollout_visits = 0
-        if timeLimit != None:
-            if iterationLimit != None:
-                raise ValueError("Cannot have both a time limit and an iteration limit")
-            # time taken for each MCTS search in milliseconds
-            self.timeLimit = timeLimit
-            self.limitType = 'time'
+        self.solution = solution
+        self.limit_arr = limit_arr
+        self.result = {k:[] for k in range(len(limit_arr))}
+        self.limit_cell = 0
+        self.limit_type = limit_type
+
+        if LimitType(limit_type) == LimitType.time:
+            self.timeLimit = self.limit_arr.max()
         else:
-            if iterationLimit == None:
-                raise ValueError("Must have either a time limit or an iteration limit")
-            # number of iterations of the search
-            if iterationLimit < 1:
-                raise ValueError("Iteration limit must be greater than one")
-            self.searchLimit = iterationLimit
-            self.limitType = 'iterations'
+            self.searchLimit = self.limit_arr.max()
         self.explorationConstant = explorationConstant
-        self.rollout = random_fill_policy#weighted_policy#rolloutPolicy
+        self.rollout = weighted_policy#random_fill_policy#rolloutPolicy
 
     def search(self, initialState):
-        self.root = treeNode(initialState, None)
-        last_val = self.root.total_reward
-        if self.limitType == 'time':
-            timeLimit = time.time() + self.timeLimit / 1000
-            while time. time() < timeLimit:
-                last_val = self.root.total_reward
-                self.executeRound()
-            print(f"Best Val {last_val}")
 
-        else:
-            for i in range(self.searchLimit):
+        self.curr_stamp = self.init_ts= time.time()
+        self.turn = 0
+        self.root = treeNode(initialState, None)
+        if LimitType(self.limit_type) == LimitType.time:
+            timeLimit = time.time() + self.timeLimit / 1000
+            while time. time() < timeLimit and self.root.total_reward != self.solution:
                 self.executeRound()
+            print(f"Best Val {self.root.total_reward}")
+
+        elif LimitType(self.limit_type) == LimitType.turn:
+            for i in range(self.searchLimit):
+                if self.root.total_reward == self.solution:
+                    break
+                self.executeRound()
+                if self.turn in self.limit_arr:
+                    self.update_limit_cell(self.root.total_reward)
+        else:
+            i = 0
+            while self.root.total_reward != self.solution:
+                self.executeRound()
+                i+=1
+                if i == 1000000:
+                    print("stopping after 1 mil turns")
+                    break
         #bestChild = self.get_best_child(self.root, 0)
         print(f"rollout visits {self.rollout_visits}")
-        return self.root
+        return self.result if self.result[0] != [] else {-1:[self.root.total_reward, self.curr_stamp, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]}
+
+    def update_limit_cell(self, reward):
+        self.result[self.limit_cell] = [reward, self.curr_stamp - self.init_ts, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]
+        self.limit_cell += 1
 
     def executeRound(self):
+        self.turn += 1
         node = self.selectNode(self.root)
         print(f"rolling state {node.state.curr.var_val}")
         reward, visits = self.rollout(node.state)
+        self.curr_stamp = time.time()
+        delta_t = self.curr_stamp - self.init_ts
+        print(delta_t)
+        if self.limit_type != LimitType.unbounded and self.limit_cell < len(self.limit_arr):
+            if (reward == self.solution and (self.limit_type == LimitType.time and self.limit_arr[self.limit_cell] >= delta_t)):
+                self.update_limit_cell(reward)
+            elif self.limit_type == LimitType.time and self.limit_arr[self.limit_cell] > delta_t:
+                self.update_limit_cell(self.root.total_reward)
         self.rollout_visits += visits
         print(f"reward {reward}, hval {node.state.curr.h_val}")
         self.backpropogate(node, reward)
 
     def selectNode(self, node):
         i=0
+        self.total_visits += 1
         for a in node.children.values():
             if a.state.curr.h_val is not None and a.state.curr.h_val > self.root.total_reward:
                 a.state.curr.set_not_valid()
                 a.total_reward = np.inf
         while not node.is_terminal():
             i+=1
+            self.total_visits += 1
             if node.isFullyExpanded:
                 node = self.get_best_child(node, self.explorationConstant)
+                self.max_lvl = node.state.curr.level
             else:
                 return self.expand(node)
         return node
