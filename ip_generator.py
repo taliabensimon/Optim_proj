@@ -10,6 +10,8 @@ def valid_problem(problem):
     optim_val, optim_solution = res[0],res[1]
     if 1 not in optim_solution:
         return False, None
+    if sum(optim_solution)<5:
+        return False, None
     if optim_val is None:
         return False, None
     if np.dot(problem.original_func_coeff, optim_solution) != optim_val:
@@ -31,13 +33,15 @@ if __name__ == '__main__':
         var_bounds = []
         const_coeff = []
         const_bound = []
-        num_var = np.random.randint(3,50)
-        const_num = int((50/max(num_var,15)) * 2)
+        num_var = np.random.randint(20,50)
+        const_num = int((100/max(num_var,15)) * 2)
         for i in range(num_var):
-            func_coeff.append(np.random.randint(0,100))
+            func_coeff.append(np.random.randint(0,1000))
             var_bounds.append((0,1))
         for j in range(const_num):
-            const_coeff.append(np.random.randint(0,100,size=num_var))
+            temp_arr = np.random.randint(0,100,size=num_var)
+            temp_arr[np.random.choice(range(len(temp_arr)),size=int(len(temp_arr)//2))] = 0
+            const_coeff.append(temp_arr)
             const_bound.append(np.random.randint(0,100))
         func_coeff = np.array(func_coeff) * -1
         prob = Problem(OptType.MIN, func_coeff, const_coeff, const_bound, var_bounds, func_coeff)
@@ -47,5 +51,5 @@ if __name__ == '__main__':
             ress1.append(res)
             np.random.seed(np.random.randint(0,2**32))
 
-    with open("gen_problems_pickle", "wb") as f:
+    with open("gen_problems_pickle2", "wb") as f:
         pickle.dump(problems, f)
