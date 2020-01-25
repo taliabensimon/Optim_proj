@@ -58,8 +58,6 @@ def mknapcb():
 
     problems = []
     for f_id, file in enumerate(files):
-        if "gk" in file:
-            continue
         print(file)
         with open(file, "r") as f:
             content = f.read().replace("\t"," ").split("\n")
