@@ -43,9 +43,10 @@ def mknap1():
         pickle.dump(problems, f)
 
 def mknapcb():
-    problems = []
     files = [f"mknapcb{i}.txt" for i in range(1, 10)]
     for f_id, file in enumerate(files):
+
+        problems = []
         with open(file) as f:
             content = f.readlines()
         num_problems = int(content[0][:-1])
