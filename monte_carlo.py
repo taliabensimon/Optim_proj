@@ -101,7 +101,7 @@ class mcts():
         else:
             self.searchLimit = self.limit_arr.max()
         self.explorationConstant = explorationConstant
-        self.rollout = weighted_policy#random_fill_policy#rolloutPolicy
+        self.rollout = random_fill_policy#weighted_policy##rolloutPolicy
 
     def search(self, initialState):
 
@@ -140,8 +140,13 @@ class mcts():
     def executeRound(self):
         self.turn += 1
         node = self.selectNode(self.root)
-        print(f"rolling state {node.state.curr.var_val}")
-        reward, visits = self.rollout(node.state)
+        if node.state.curr.not_valid:
+            visits = 0
+            reward = -np.inf
+            print("NODE SKIP")
+        else:
+            reward, visits = self.rollout(node.state)
+            print(f"rolling state {node.state.curr.var_val}")
         self.curr_stamp = time.time()
         delta_t = self.curr_stamp - self.init_ts
         print(delta_t)
@@ -176,13 +181,16 @@ class mcts():
 
         for action in actions:
             if action not in node.children:
-                newNode = treeNode(node.state.takeAction(action), node)
-                node.children[action] = newNode
-                print(f"added {newNode.state.curr.val}")
-                if len(actions) == len(node.children):
-                #if len(actions) == node.state.get_num_explored_valid_children():
+                new_node = treeNode(node.state.takeAction(action), node)
+                if not new_node.state.curr.not_valid:
+                    node.children[action] = new_node
+                    print(f"added {new_node.state.curr.val}")
+                    if len(actions) == len(node.children):
+                    #if len(actions) == node.state.get_num_explored_valid_children():
+                        node.isFullyExpanded = True
+                elif len(actions) == len(node.children) + 1:
                     node.isFullyExpanded = True
-                return newNode
+                return new_node
         # print(f"in children, node terminal {node.is_terminal()}")
         # print("EXCEPT")
         raise Exception("Should never reach here")

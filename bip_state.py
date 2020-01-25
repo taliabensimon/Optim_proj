@@ -37,8 +37,8 @@ class BinaryIntegerProgramming(Tree):
         return possible_children
 
     def get_possible_solution(self):
-        var_count = len(self.root.var_val)
-        var_val = np.random.randint(0,2,(var_count))
+        var_count = len(self.curr.var_val[self.curr.level:])
+        var_val = np.concatenate((self.curr.var_val[:self.curr.level], np.random.randint(0,2,(var_count))))
         for i,c in enumerate(self.root.problem.constraint_coeff):
             if np.dot(var_val, c) > self.root.problem.constraint_bound[i]:
                 return -np.inf
