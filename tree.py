@@ -23,16 +23,32 @@ class Tree(object):
 
     def lp_node_value(self, problem):
         const_coeff = problem.constraint_coeff if len(problem.constraint_coeff) > 0 else None
-        result = scilp(problem.func_coeff,A_ub = const_coeff,b_ub = problem.constraint_bound, bounds = problem.var_bounds)
+        try:
+            result = scilp(problem.func_coeff,A_ub = const_coeff,b_ub = problem.constraint_bound, bounds = problem.var_bounds)
+        except:
+            result = {
+        'x': None,
+        'fun': None,
+        'slack': None,
+        'con': None,
+        'status': None,
+        'message': None,
+        'nit': None,
+        'success': False}
         return result
 
     def get_lp_addition(self, var_vals, level, problem):
-        val = np.Infinity
+        val = np.inf
         addition = np.dot(var_vals[:level], problem.original_func_coeff[:level])
         result = copy.deepcopy(self.lp_node_value(problem))
         if result["success"]:
             val = result["fun"] + addition
         return result,val
+
+
+    def is_valid_solution(self, x):
+        #check if the solution contins only intergers
+        return all(np.equal(np.mod(x, 1), 0)) #not False in np.eq...
 
     def get_children(self,node):
         if node.is_final:

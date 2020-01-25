@@ -7,23 +7,45 @@ class BinaryIntegerProgramming(Tree):
     def __init__(self, root, node = None):
         self.root = root
         self.curr = node if node is not None else self.root
-        if not self.curr.is_final:
+        if node is None: # Set root
             self.curr.h_val = self.lp_node_value(self.curr.problem)['fun']
+
+        if node is not None and not self.curr.is_final:
+            res, val = self.get_lp_addition(self.curr.var_val, self.curr.level, self.curr.problem)
+            if res["success"] and round(val,4) >= round(self.root.h_val,4) and abs(self.root.h_val - val) < 600:
+                self.curr.h_val = val
+                if self.is_valid_solution(res['x']):
+                    self.curr.val = val
+                    self.curr.is_final = True
+                    for i, v in enumerate(res['x']):
+                        self.curr.var_val[i + self.curr.level] = int(v)
+            else:
+                self.curr.set_not_valid()
         # print(f"new eval {self.curr.val}")
 
-    def getPossibleActions(self):
+    def get_possible_actions(self):
         possible_children = []
         node_children = self.curr.get_children()#self.get_children(self.curr)
         for child in node_children:
             # child.val = self.lp_node_value(child.problem)
             # self.curr.add_child(child)
-            if not child.not_valid and (child.h_val is None or child.h_val >= self.root.h_val):
+            if not child.not_valid and (child.h_val is None or (round(child.h_val,4) >= round(self.root.h_val,4) and child.h_val != - np.inf)) :
                 possible_children.append(Action(child))
+            elif not child.not_valid and child.h_val is not None:
+                print()
         # return node_children
         return possible_children
 
+    def get_possible_solution(self):
+        var_count = len(self.root.var_val)
+        var_val = np.random.randint(0,2,(var_count))
+        for i,c in enumerate(self.root.problem.constraint_coeff):
+            if np.dot(var_val, c) > self.root.problem.constraint_bound[i]:
+                return -np.inf
+        return np.dot(var_val, self.root.problem.func_coeff)
 
     def takeAction(self, action):
+
         new_state = BinaryIntegerProgramming(self.root, action.node)
         return new_state
 
@@ -48,15 +70,14 @@ class BinaryIntegerProgramming(Tree):
 
     def getReward(self):
         if len(self.curr.get_children()) > 0 and not self.has_valid_child():
-            self.curr.val = -np.inf
-            self.curr.not_valid = True
+            self.curr.set_not_valid()
         if self.curr.is_final:
             assert self.curr.val is not None
             return self.curr.val
         res, val = self.get_lp_addition(self.curr.var_val, self.curr.level, self.curr.problem)
         if not res["success"]:
-            self.curr.val = -np.inf
-            self.curr.not_valid = True
+            self.curr.set_not_valid()
+
         return val if res["success"] else -np.inf
 
 

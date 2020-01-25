@@ -42,6 +42,11 @@ class Node(object):
         if len(self.children) == 0:
             self.eval_children()
         assert len(self.children) <= 2
+        children_h_val = [c.h_val for c in self.children if c.h_val is not None and c.h_val != -np.inf]
+        if len(children_h_val) == 2:
+            min_child_h_val = min([c.h_val for c in self.children])
+            if min_child_h_val != -np.inf:
+                self.h_val = min_child_h_val
         return self.children
 
     def set_val(self, val):
@@ -62,7 +67,12 @@ class Node(object):
     def set_not_valid(self):
         self.not_valid = True
         self.is_final = True
+        self.h_val = -np.inf
         self.val = -np.inf
+
+    def set_final(self, val):
+        self.is_final = True
+        self.val = val
 
     def update_problem(self, curr_problem):
         if self.is_final and not self.not_valid: # if it's the last node and it's valid
@@ -78,15 +88,15 @@ class Node(object):
         const_bound = []
 
         for i, ct in enumerate(curr_problem.constraint_coeff):
-            var_val = ct[0] * self.var_val[self.level-1] # assign current variable it's value*it's coeff
-            new_bound = curr_problem.constraint_bound[i] - var_val
+            var_assignment = ct[0] * self.var_val[self.level-1] # assign current variable it's value*it's coeff
+            new_bound = curr_problem.constraint_bound[i] - var_assignment
             if len(ct) > 2:
                 const_coeff.append(copy.deepcopy(ct[1:]))
                 const_bound.append(new_bound)
             else:  # constraint becomes a variable bound
                 bound = list(var_bound[0])
                 if ct[1] == 0:
-                    if var_val > curr_problem.constraint_bound[i]:
+                    if var_assignment > curr_problem.constraint_bound[i]:
                           self.set_not_valid()
                           break
                     else:
