@@ -90,7 +90,7 @@ class mcts():
         self.max_lvl = 0
         self.total_visits = 0
         self.rollout_visits = 0
-        self.solution = solution
+        self.solution = -solution
         self.limit_arr = limit_arr
         self.result = {k:[] for k in range(len(limit_arr))} if limit_arr is not None else {-1: []}
         self.limit_cell = 0
