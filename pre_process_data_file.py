@@ -75,7 +75,7 @@ def mknapcb():
             for c in content[i].split(" "):
                 if c.isdigit():
                     func_coeff.append(float(c))
-        func_coeff *= -1
+        func_coeff = np.array(func_coeff) * -1
             # func_coeff = np.concatenate((func_coeff, np.array(content[i][:-1].strip().replace("  ", " ").replace("\t"," ").split(" "), dtype=float) * -1))
         # i += 1
         assert len(func_coeff) == num_vars
@@ -116,7 +116,7 @@ def mknapcb():
 
 
 if __name__ == '__main__':
-    mknap1()
-    #mknapcb()
+    #mknap1()
+    mknapcb()
 
 

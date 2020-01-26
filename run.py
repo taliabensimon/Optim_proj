@@ -59,19 +59,21 @@ if __name__ == '__main__':
     turns_map_mc2 = {}
     for i, (p, v) in enumerate(problems_arr):
         res_bb = call_bb(p, None, LimitType.unbounded)
+        print("------finish unbound bb-------\n\n")
         res_mtc = []
         res_mc_num = 0
         for mc_t in range(num_avrg_mcts):
             res_t,num_t = call_mcts(p, v, None, LimitType.unbounded,True)
+            print("------finish unbound mc-------\n\n")
             res_mtc.append(res_t)
             res_mc_num += num_t
         res_mtc = get_avrg_dict(res_mtc)
         res_mc_num /= num_avrg_mcts
-        turns_map_bb[p.func_coeff] = turns_map_bb.get(p.func_coeff, 0) + len(res_bb[-1][3])
-        num_turns_map_bb[p.func_coeff] = num_turns_map_bb.get(p.func_coeff, 0) + 1
-        turns_map_mc[p.func_coeff] = turns_map_mc.get(p.func_coeff, 0) + res_mtc[-1][3]
-        turns_map_mc2[p.func_coeff] = turns_map_mc2.get(p.func_coeff, 0) + res_mc_num
-        num_turns_map_mc[p.func_coeff] = num_turns_map_mc.get(p.func_coeff, 0) + 1
+        turns_map_bb[len(p.func_coeff)] = turns_map_bb.get(len(p.func_coeff), 0) + len(res_bb[-1][3])
+        num_turns_map_bb[len(p.func_coeff)] = num_turns_map_bb.get(len(p.func_coeff), 0) + 1
+        turns_map_mc[len(p.func_coeff)] = turns_map_mc.get(len(p.func_coeff), 0) + res_mtc[-1][3]
+        turns_map_mc2[len(p.func_coeff)] = turns_map_mc2.get(len(p.func_coeff), 0) + res_mc_num
+        num_turns_map_mc[len(p.func_coeff)] = num_turns_map_mc.get(len(p.func_coeff), 0) + 1
 
     for k in turns_map_bb.keys():
         turns_map_bb[k] /= num_turns_map_bb[k]
@@ -90,23 +92,26 @@ if __name__ == '__main__':
 
             for i, (p, v) in enumerate(problems_arr):
                 low_lim = 0 if j == 0 else problems_size[j - 1]
-                if p.func_coeff <= p_size and p.func_coeff > low_lim:
+                if len(p.func_coeff) <= p_size and len(p.func_coeff) > low_lim:
+
+                    res_bb = call_bb(p,arr,arry_type[ij])
+                    print("------finish unbound bb-------\n\n")
+                    res_mtc = []
+                    for mc_t in range(num_avrg_mcts):
+                        res_mtc.append(call_mcts(p, v, arr, arry_type[ij]))
+                        print("------finish unbound mc-------\n\n")
+                    res_mtc = get_avrg_dict(res_mtc,v)
+
+                    for k in res_bb.keys():
+                        temp_aq = 0 if res_bb[k][0] is None else res_bb[k][0]
+                        res_bb[k] = temp_aq - v
+
+                    size_res_bb.append(res_bb)
+                    size_res_mtc.append(res_mtc)
+
+                    print('_______________________________________________________\n\n\n\n')
+                else:
                     continue
-
-                res_bb = call_bb(p,arr,arry_type[ij])
-                res_mtc = []
-                for mc_t in range(num_avrg_mcts):
-                    res_mtc.append(call_mcts(p, v, arr, arry_type[ij]))
-                res_mtc = get_avrg_dict(res_mtc,v)
-
-                for k in res_bb.keys():
-                    temp_aq = 0 if res_bb[k][0] is None else res_bb[k][0]
-                    res_bb[k] = temp_aq - v
-
-                size_res_bb.append(res_bb)
-                size_res_mtc.append(res_mtc)
-
-                print('_______________________________________________________\n\n\n\n')
             size_res_mtc = get_avrg_dict(size_res_mtc,False)
             size_res_bb = get_avrg_dict(size_res_bb,False)
             size_res_mtc.pop(-1, None)

@@ -90,7 +90,8 @@ class BranchAndBound(Tree):
                         else:
                             self.result[limit_iter].extend([self.best_node_till_now.val, self.best_node_till_now.var_val, self.jump_indicator, self.node_searched])
                         limit_iter += 1
-                        timeLimit = time.time() + self.limit[limit_iter] / 1000
+                        if limit_iter < len(self.limit):
+                            timeLimit = time.time() + self.limit[limit_iter] / 1000
 
                 else:
                     if len(self.node_searched) == self.limit[limit_iter]:
@@ -145,8 +146,9 @@ class BranchAndBound(Tree):
                                                 else:
                                                     self.result[limit_iter].extend([self.best_node_till_now.val, self.best_node_till_now.var_val, self.jump_indicator,self.node_searched])
                                                 limit_iter += 1
-                                                timeLimit = time.time() + self.limit[limit_iter] / 1000
+                                                #timeLimit = time.time() + self.limit[limit_iter] / 1000
                                             if limit_iter < len(self.limit):
+                                                timeLimit = time.time() + self.limit[limit_iter] / 1000
                                                 self.best_node_till_now = new_node
                                     #print(f'new var val {new_node.var_val}')
                                     #new_node.var_val = res['x'] #res[LPResult.VAR_COEFF]
