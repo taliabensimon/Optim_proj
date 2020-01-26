@@ -26,6 +26,7 @@ class Tree(object):
         try:
             result = scilp(problem.func_coeff,A_ub = const_coeff,b_ub = problem.constraint_bound, bounds = problem.var_bounds)
         except:
+            print("lp except")
             result = {
         'x': None,
         'fun': None,

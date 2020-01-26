@@ -116,7 +116,7 @@ class BranchAndBound(Tree):
                         while limit_iter < len(self.limit):
                             self.result[limit_iter].extend([temp_best_node.val, temp_best_node.var_val, self.jump_indicator, self.node_searched])
                             limit_iter += 1
-                    self.result[-1].extend([temp_best_node.val, temp_best_node.var_val, self.jump_indicator, self.node_searched])
+                    self.result[-1]=[temp_best_node.val, temp_best_node.var_val, self.jump_indicator, self.node_searched]
                     return self.result
                     #return temp_best_node.val, temp_best_node.var_val, self.jump_indicator, self.node_searched
                 else:  # otherwise, we're unsure if this branch holds promise. Maybe it can't actually achieve this lower bound. So branch into it
@@ -161,5 +161,8 @@ class BranchAndBound(Tree):
                         # heappush(heap, (res, next(counter), new_node))  # using counter to avoid possible comparisons between nodes. It tie breaks
         # no solution for this problem
         #return None, None, self.jump_indicator, self.node_searched
-        self.result[-1].extend([None, None, self.jump_indicator, self.node_searched])
+        self.result[-1]=[None, None, self.jump_indicator, self.node_searched]
+        while limit_iter < len(self.limit):
+            self.result[limit_iter].extend([None, None, self.jump_indicator, self.node_searched])
+            limit_iter += 1
         return self.result
