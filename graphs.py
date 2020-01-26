@@ -24,6 +24,7 @@ def graph_for_size(limit_type,arr,res_bb,res_mct,prob_size):
         plt.xlabel('problem size')
         plt.ylabel('avrg num of nodes seen')
         plt.title('avrg num of nodes seenfor problem size')
+        plt.legend()
         plt.show()
         plt.plot(arr, res_bb, '-b', label='bb')
         plt.plot(arr, res_mct[1], '-r', label='mct')

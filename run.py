@@ -7,6 +7,7 @@ from  bb import BranchAndBound
 import pickle
 import numpy as np
 from graphs import graph_for_size
+import atexit
 
 def call_bb(p,arr_limits,type):
     b_b = BranchAndBound(p,type,arr_limits)
@@ -43,7 +44,7 @@ def get_avrg_dict(dict_arr,sub=0,t=True):
 
 
 if __name__ == '__main__':
-    num_avrg_mcts = 5
+    num_avrg_mcts = 1
     problems_size = [50,100,500]
     arry_type = [LimitType.time,LimitType.turn]
     #time_arr = [i for i in range(100,1000,100)].append([i for i in range(1000,10000,500)]).append([i for i in range(10000,60000,1000)]).append([i for i in range(60000,350000,10000)])
@@ -52,37 +53,40 @@ if __name__ == '__main__':
         problems_arr = pickle.load(f)
     with open("problems_pickle_v2", 'rb') as f:
         problems_arr.extend(pickle.load(f))
-    #
-    # turns_map_bb = {}
-    # num_turns_map_bb = {}
-    # turns_map_mc = {}
-    # num_turns_map_mc = {}
-    # turns_map_mc2 = {}
-    # for i, (p, v) in enumerate(problems_arr):
-    #     res_bb = call_bb(p, None, LimitType.unbounded)
-    #     print("------finish unbound bb-------\n\n")
-    #     res_mtc = []
-    #     res_mc_num = 0
-    #     for mc_t in range(num_avrg_mcts):
-    #         res_t,num_t = call_mcts(p, v, None, LimitType.unbounded,True)
-    #         print("------finish unbound mc-------\n\n")
-    #         res_mtc.append(res_t)
-    #         res_mc_num += num_t
-    #     res_mtc = get_avrg_dict(res_mtc)
-    #     res_mc_num /= num_avrg_mcts
-    #     turns_map_bb[len(p.func_coeff)] = turns_map_bb.get(len(p.func_coeff), 0) + len(res_bb[-1][3])
-    #     num_turns_map_bb[len(p.func_coeff)] = num_turns_map_bb.get(len(p.func_coeff), 0) + 1
-    #     turns_map_mc[len(p.func_coeff)] = turns_map_mc.get(len(p.func_coeff), 0) + res_mtc[-1][3]
-    #     turns_map_mc2[len(p.func_coeff)] = turns_map_mc2.get(len(p.func_coeff), 0) + res_mc_num
-    #     num_turns_map_mc[len(p.func_coeff)] = num_turns_map_mc.get(len(p.func_coeff), 0) + 1
-    #
-    # for k in turns_map_bb.keys():
-    #     turns_map_bb[k] /= num_turns_map_bb[k]
-    #     turns_map_mc[k] /= num_turns_map_mc[k]
-    #     turns_map_mc2[k] /= num_turns_map_mc[k]
-    #
-    # graph_mc = turns_map_mc.values().append(turns_map_mc2.values())
-    # graph_for_size(LimitType.unbounded,turns_map_bb.keys(),turns_map_bb.values(),graph_mc,None)
+
+    turns_map_bb = {}
+    num_turns_map_bb = {}
+    turns_map_mc = {}
+    num_turns_map_mc = {}
+    turns_map_mc2 = {}
+    for i, (p, v) in enumerate(problems_arr):
+        if len(p.func_coeff) > 6 or i == 23 or i == 5 or i == 6:
+            continue
+        print(i)
+        res_bb = call_bb(p, None, LimitType.unbounded)
+        print("------finish unbound bb-------\n\n")
+        res_mtc = []
+        res_mc_num = 0
+        for mc_t in range(num_avrg_mcts):
+            res_t,num_t = call_mcts(p, v, None, LimitType.unbounded,True)
+            print("------finish unbound mc-------\n\n")
+            res_mtc.append(res_t)
+            res_mc_num += num_t
+        res_mtc = get_avrg_dict(res_mtc)
+        res_mc_num /= num_avrg_mcts
+        turns_map_bb[len(p.func_coeff)] = turns_map_bb.get(len(p.func_coeff), 0) + len(res_bb[-1][3])
+        num_turns_map_bb[len(p.func_coeff)] = num_turns_map_bb.get(len(p.func_coeff), 0) + 1
+        turns_map_mc[len(p.func_coeff)] = turns_map_mc.get(len(p.func_coeff), 0) + res_mtc[-1][3]
+        turns_map_mc2[len(p.func_coeff)] = turns_map_mc2.get(len(p.func_coeff), 0) + res_mc_num
+        num_turns_map_mc[len(p.func_coeff)] = num_turns_map_mc.get(len(p.func_coeff), 0) + 1
+
+    for k in turns_map_bb.keys():
+        turns_map_bb[k] /= num_turns_map_bb[k]
+        turns_map_mc[k] /= num_turns_map_mc[k]
+        turns_map_mc2[k] /= num_turns_map_mc[k]
+
+    graph_mc = list(turns_map_mc.values()).append(list(turns_map_mc2.values()))
+    graph_for_size(LimitType.unbounded,list(turns_map_bb.keys()),list(turns_map_bb.values()),graph_mc,None)
 
     for j,p_size in enumerate(problems_size):
         size_res = []
@@ -95,7 +99,7 @@ if __name__ == '__main__':
                 if i == 23 or i == 5 or i == 6:
                     continue
                 low_lim = 0 if j == 0 else problems_size[j - 1]
-                if len(p.func_coeff) <= p_size and len(p.func_coeff) > low_lim:
+                if len(p.func_coeff) < p_size and len(p.func_coeff) >= low_lim:
                     print(i)
 
                     res_bb = call_bb(p,arr,arry_type[ij])
