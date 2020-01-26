@@ -44,11 +44,15 @@ def get_avrg_dict(dict_arr,sub=0,t=True):
 
 
 if __name__ == '__main__':
-    num_avrg_mcts = 1
+    num_avrg_mcts = 2
     problems_size = [50,100,500]
     arry_type = [LimitType.time,LimitType.turn]
-    #time_arr = [i for i in range(100,1000,100)].append([i for i in range(1000,10000,500)]).append([i for i in range(10000,60000,1000)]).append([i for i in range(60000,350000,10000)])
-    arry_limit = [[50,100,150,200,250,300,350,400,450,500], [1,2,3,4,5,7,10,15,22,30,40,55,70,90,140,200,300,450,700,1000,1500,3000]]
+    time_arr = [i for i in range(100,1000,100)]
+    time_arr.extend([i for i in range(1000,10000,500)])
+    time_arr.extend([i for i in range(10000,60000,1000)])
+    time_arr.extend([i for i in range(60000,350000,10000)])
+    time_arr.extend([600000, 900000, int(1.2e6)])
+    arry_limit = [time_arr, [1,2,3,4,5,7,10,15,22,30,40,55,70,90,140,200,300,450,700,1000,1500,3000]]
     with open("problems_large_data_pickle", 'rb') as f:
         problems_arr = pickle.load(f)
     with open("problems_pickle_v2", 'rb') as f:
@@ -60,23 +64,26 @@ if __name__ == '__main__':
     num_turns_map_mc = {}
     turns_map_mc2 = {}
     for i, (p, v) in enumerate(problems_arr):
-        if len(p.func_coeff) > 6 or i == 23 or i == 5 or i == 6:
+        if len(p.func_coeff) > 80 or i == 23 or i == 5 or i == 6:
             continue
         print(i)
         res_bb = call_bb(p, None, LimitType.unbounded)
         print("------finish unbound bb-------\n\n")
         res_mtc = []
         res_mc_num = 0
+        travel_num= 0
         for mc_t in range(num_avrg_mcts):
             res_t,num_t = call_mcts(p, v, None, LimitType.unbounded,True)
             print("------finish unbound mc-------\n\n")
+            travel_num += res_t[-1][3]
             res_mtc.append(res_t)
             res_mc_num += num_t
         res_mtc = get_avrg_dict(res_mtc)
         res_mc_num /= num_avrg_mcts
+        travel_num /= num_avrg_mcts
         turns_map_bb[len(p.func_coeff)] = turns_map_bb.get(len(p.func_coeff), 0) + len(res_bb[-1][3])
         num_turns_map_bb[len(p.func_coeff)] = num_turns_map_bb.get(len(p.func_coeff), 0) + 1
-        turns_map_mc[len(p.func_coeff)] = turns_map_mc.get(len(p.func_coeff), 0) + res_mtc[-1][3]
+        turns_map_mc[len(p.func_coeff)] = turns_map_mc.get(len(p.func_coeff), 0) + travel_num
         turns_map_mc2[len(p.func_coeff)] = turns_map_mc2.get(len(p.func_coeff), 0) + res_mc_num
         num_turns_map_mc[len(p.func_coeff)] = num_turns_map_mc.get(len(p.func_coeff), 0) + 1
 
@@ -85,7 +92,8 @@ if __name__ == '__main__':
         turns_map_mc[k] /= num_turns_map_mc[k]
         turns_map_mc2[k] /= num_turns_map_mc[k]
 
-    graph_mc = list(turns_map_mc.values()).append(list(turns_map_mc2.values()))
+    graph_mc = [list(turns_map_mc.values())]
+    graph_mc.append(list(turns_map_mc2.values()))
     graph_for_size(LimitType.unbounded,list(turns_map_bb.keys()),list(turns_map_bb.values()),graph_mc,None)
 
     for j,p_size in enumerate(problems_size):
