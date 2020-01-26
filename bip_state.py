@@ -12,7 +12,7 @@ class BinaryIntegerProgramming(Tree):
 
         if node is not None and not self.curr.is_final:
             res, val = self.get_lp_addition(self.curr.var_val, self.curr.level, self.curr.problem)
-            if res["success"] and round(val,4) >= round(self.root.h_val,4) and abs(self.root.h_val - val) < 600:
+            if res["success"] and round(val,4) >= round(self.root.h_val,4):
                 self.curr.h_val = val
                 if self.is_valid_solution(res['x']):
                     self.curr.val = val

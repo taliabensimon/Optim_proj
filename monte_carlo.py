@@ -133,7 +133,7 @@ class mcts():
                     print("stopping after 1 mil turns")
                     break
         #bestChild = self.get_best_child(self.root, 0)
-        print(f"rollout visits {self.rollout_visits}")
+        print(f"rollout visits {self.rollout_visits} best val: {self.root.total_reward}")
         return (self.result if 0 in self.result and self.result[0] != [] else {-1:[self.root.total_reward, self.curr_stamp, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]}), self.turn
 
     def update_limit_cell(self, reward, id = None):
@@ -219,8 +219,8 @@ class mcts():
             min_child_h_val = min([c.h_val for c in node.state.curr.children])
             if min_child_h_val != -np.inf:
                 node.state.curr.h_val = min_child_h_val
-                if abs(self.root.state.curr.h_val - min_child_h_val) > 600:
-                    node.state.curr.set_not_valid()
+                # if abs(self.root.state.curr.h_val - min_child_h_val) > 600:
+                #     node.state.curr.set_not_valid()
         while node is not None:
             node.num_visits += 1
             # print(reward)
