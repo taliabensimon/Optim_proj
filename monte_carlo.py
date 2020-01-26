@@ -97,9 +97,9 @@ class mcts():
         self.limit_type = limit_type
 
         if LimitType(limit_type) == LimitType.time:
-            self.timeLimit = self.limit_arr.max()
+            self.timeLimit = np.array(self.limit_arr).max()
         elif LimitType(limit_type) == LimitType.turn:
-            self.searchLimit = self.limit_arr.max()
+            self.searchLimit = np.array(self.limit_arr).max()
         self.explorationConstant = explorationConstant
         self.rollout = random_fill_policy#weighted_policy##rolloutPolicy
 
@@ -113,7 +113,7 @@ class mcts():
             while time. time() < timeLimit and self.root.total_reward != self.solution:
                 self.executeRound()
             self.fill_limit_cell(self.root.total_reward)
-            # print(f"Best Val {self.root.total_reward}")
+            print(f"Best Val {self.root.total_reward}")
 
         elif LimitType(self.limit_type) == LimitType.turn:
             for i in range(self.searchLimit):
@@ -133,8 +133,8 @@ class mcts():
                     print("stopping after 1 mil turns")
                     break
         #bestChild = self.get_best_child(self.root, 0)
-        # print(f"rollout visits {self.rollout_visits}")
-        return (self.result if self.result[0] != [] else {-1:[self.root.total_reward, self.curr_stamp, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]}), self.turn
+        print(f"rollout visits {self.rollout_visits}")
+        return (self.result if 0 in self.result and self.result[0] != [] else {-1:[self.root.total_reward, self.curr_stamp, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]}), self.turn
 
     def update_limit_cell(self, reward, id = None):
         if id is not None:
