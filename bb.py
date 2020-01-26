@@ -3,6 +3,7 @@ from tree import Tree, LPResult
 from node import Node
 import numpy as np
 import time
+from monte_carlo import LimitType
 
 
 class MaxHeap(object):
@@ -26,7 +27,7 @@ class MaxHeap(object):
 
 
 class BranchAndBound(Tree):
-    def __init__(self,problem,limiType=None,limit=None):
+    def __init__(self,problem,limiType=LimitType.unbounded,limit=None):
         super(BranchAndBound, self).__init__(problem)
         if self.best_possible_val is None:
             self.root.set_not_valid()
@@ -36,6 +37,10 @@ class BranchAndBound(Tree):
         self.best_node_till_now = None
         self.limitType = limiType
         self.limit=limit
+        if limiType != LimitType.unbounded:
+            self.result = {k: [] for k in range(len(limit))}
+        else:
+            self.result = {-1: []}
 
     def is_valid_solution(self, x):
         #check if the solution contins only intergers
@@ -66,8 +71,9 @@ class BranchAndBound(Tree):
             self.jump_indicator[test_temp] = self.jump_indicator.get(test_temp, 0) + 1
 
     def bbsolve(self):
-        if self.limitType is not None and self.limitType == 'time':
-            timeLimit = time.time() + self.limit / 1000
+        limit_iter = 0
+        if self.limitType is not None and self.limitType == LimitType.time:
+            timeLimit = time.time() + self.limit[limit_iter] / 1000
         num = 0
         self.priority_queue.add(self.root,num)
         num += 1
@@ -75,17 +81,26 @@ class BranchAndBound(Tree):
         jump_level = 0
         temp_varval2 = self.root.var_val.copy()
         while not self.priority_queue.is_empty():
-            if self.limitType is not None:
-                if self.limitType == 'time':
-                    if time.time() > timeLimit:
+            if self.limitType is not LimitType.unbounded:
+                if self.limitType == LimitType.time:
+
+                    while time.time() > timeLimit and limit_iter < len(self.limit):
                         if self.best_node_till_now is None:
-                            return None, None, self.jump_indicator, self.node_searched
-                        return self.best_node_till_now.val, self.best_node_till_now.var_val, self.jump_indicator, self.node_searched
+                            self.result[limit_iter].extend([None, None, self.jump_indicator, self.node_searched])
+                        else:
+                            self.result[limit_iter].extend([self.best_node_till_now.val, self.best_node_till_now.var_val, self.jump_indicator, self.node_searched])
+                        limit_iter += 1
+                        timeLimit = time.time() + self.limit[limit_iter] / 1000
+
                 else:
-                    if len(self.node_searched) >= self.limit:
+                    if len(self.node_searched) == self.limit[limit_iter]:
                         if self.best_node_till_now is None:
-                            return None, None, self.jump_indicator, self.node_searched
-                        return self.best_node_till_now.val, self.best_node_till_now.var_val, self.jump_indicator, self.node_searched
+                            self.result[limit_iter].extend([None, None, self.jump_indicator, self.node_searched])
+                        else:
+                            self.result[limit_iter].extend([self.best_node_till_now.val, self.best_node_till_now.var_val, self.jump_indicator,self.node_searched])
+                        limit_iter += 1
+                if limit_iter >= len(self.limit):
+                    return self.result
             temp_best_node = self.priority_queue.get_item()
             #print(temp_best_node.var_val)
             self.node_searched.append(temp_best_node.var_val)
@@ -96,7 +111,13 @@ class BranchAndBound(Tree):
 
             if not temp_best_node.not_valid:
                 if temp_best_node.is_final:  # if a valid solution then this is the best
-                    return temp_best_node.val, temp_best_node.var_val, self.jump_indicator, self.node_searched
+                    if self.limitType != LimitType.unbounded:
+                        while limit_iter < len(self.limit):
+                            self.result[limit_iter].extend([temp_best_node.val, temp_best_node.var_val, self.jump_indicator, self.node_searched])
+                            limit_iter += 1
+                    self.result[-1].extend([temp_best_node.val, temp_best_node.var_val, self.jump_indicator, self.node_searched])
+                    return self.result
+                    #return temp_best_node.val, temp_best_node.var_val, self.jump_indicator, self.node_searched
                 else:  # otherwise, we're unsure if this branch holds promise. Maybe it can't actually achieve this lower bound. So branch into it
                     new_nodes = self.get_children(temp_best_node)
                     for new_node in new_nodes:
@@ -112,8 +133,21 @@ class BranchAndBound(Tree):
                                     #print(f'var val {new_node.var_val}')
                                     for i,v in enumerate(res['x']):
                                         new_node.var_val[i+new_node.level] = int(v)
-                                    if (self.best_node_till_now is None or self.best_node_till_now.val >= new_node.val) and (self.limitType is None or self.limitType != 'time' or (self.limitType == 'time' and time.time() < timeLimit)):
-                                        self.best_node_till_now = new_node
+                                    if (self.best_node_till_now is None or self.best_node_till_now.val >= new_node.val):
+                                        if self.limitType != LimitType.time:
+                                            self.best_node_till_now = new_node
+                                        elif time.time() <= timeLimit:
+                                            self.best_node_till_now = new_node
+                                        else:
+                                            while time.time() > timeLimit and limit_iter < len(self.limit):
+                                                if self.best_node_till_now is None:
+                                                    self.result[limit_iter].extend([None, None, self.jump_indicator, self.node_searched])
+                                                else:
+                                                    self.result[limit_iter].extend([self.best_node_till_now.val, self.best_node_till_now.var_val, self.jump_indicator,self.node_searched])
+                                                limit_iter += 1
+                                                timeLimit = time.time() + self.limit[limit_iter] / 1000
+                                            if limit_iter < len(self.limit):
+                                                self.best_node_till_now = new_node
                                     #print(f'new var val {new_node.var_val}')
                                     #new_node.var_val = res['x'] #res[LPResult.VAR_COEFF]
                                 self.priority_queue.add(new_node,num)
@@ -124,4 +158,6 @@ class BranchAndBound(Tree):
                             #     new_node.not_valid = True
                         # heappush(heap, (res, next(counter), new_node))  # using counter to avoid possible comparisons between nodes. It tie breaks
         # no solution for this problem
-        return None, None, self.jump_indicator, self.node_searched
+        #return None, None, self.jump_indicator, self.node_searched
+        self.result[-1].extend([None, None, self.jump_indicator, self.node_searched])
+        return self.result
