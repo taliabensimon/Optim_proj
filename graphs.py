@@ -18,10 +18,23 @@ def graph(problem_size, prob):
     plt.show()
 
 def graph_for_size(limit_type,arr,res_bb,res_mct,prob_size):
-    plt.plot(arr,res_bb,'b',label='bb')
-    plt.plot(arr, res_mct, 'r',label='mct')
-    plt.xlabel(f'{limit_type}')
-    plt.ylabel('dist from optimal')
-    plt.title(f'problem size: {prob_size},limit type: {limit_type}')
-    plt.show()
-    return
+    if prob_size is None:
+        plt.plot(arr, res_bb, 'b', label='bb')
+        plt.plot(arr, res_mct[0], 'r', label='mct')
+        plt.xlabel('problem size')
+        plt.ylabel('avrg num of nodes seen')
+        plt.title('avrg num of nodes seenfor problem size')
+        plt.show()
+        plt.plot(arr, res_bb, 'b', label='bb')
+        plt.plot(arr, res_mct[1], 'r', label='mct')
+        plt.xlabel('problem size')
+        plt.ylabel('avrg num of turns')
+        plt.title(f'avrg num of turns seenfor problem size')
+        plt.show()
+    else:
+        plt.plot(arr,res_bb,'b',label='bb')
+        plt.plot(arr, res_mct, 'r',label='mct')
+        plt.xlabel(f'{limit_type}')
+        plt.ylabel('dist from optimal')
+        plt.title(f'problem size: {prob_size},limit type: {limit_type}')
+        plt.show()

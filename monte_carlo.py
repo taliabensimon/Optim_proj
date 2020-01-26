@@ -92,13 +92,13 @@ class mcts():
         self.rollout_visits = 0
         self.solution = solution
         self.limit_arr = limit_arr
-        self.result = {k:[] for k in range(len(limit_arr))}
+        self.result = {k:[] for k in range(len(limit_arr))} if limit_arr is not None else {-1: []}
         self.limit_cell = 0
         self.limit_type = limit_type
 
         if LimitType(limit_type) == LimitType.time:
             self.timeLimit = self.limit_arr.max()
-        else:
+        elif LimitType(limit_type) == LimitType.turn:
             self.searchLimit = self.limit_arr.max()
         self.explorationConstant = explorationConstant
         self.rollout = random_fill_policy#weighted_policy##rolloutPolicy
@@ -113,7 +113,7 @@ class mcts():
             while time. time() < timeLimit and self.root.total_reward != self.solution:
                 self.executeRound()
             self.fill_limit_cell(self.root.total_reward)
-            print(f"Best Val {self.root.total_reward}")
+            # print(f"Best Val {self.root.total_reward}")
 
         elif LimitType(self.limit_type) == LimitType.turn:
             for i in range(self.searchLimit):
@@ -133,8 +133,8 @@ class mcts():
                     print("stopping after 1 mil turns")
                     break
         #bestChild = self.get_best_child(self.root, 0)
-        print(f"rollout visits {self.rollout_visits}")
-        return self.result if self.result[0] != [] else {-1:[self.root.total_reward, self.curr_stamp, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]}
+        # print(f"rollout visits {self.rollout_visits}")
+        return (self.result if self.result[0] != [] else {-1:[self.root.total_reward, self.curr_stamp, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]}), self.turn
 
     def update_limit_cell(self, reward, id = None):
         if id is not None:
@@ -155,13 +155,13 @@ class mcts():
         if node.state.curr.not_valid:
             visits = 0
             reward = -np.inf
-            print("NODE SKIP")
+            # print("NODE SKIP")
         else:
             reward, visits = self.rollout(node.state)
-            print(f"rolling state {node.state.curr.var_val}")
+            # print(f"rolling state {node.state.curr.var_val}")
         self.curr_stamp = time.time()
         delta_t = self.curr_stamp - self.init_ts
-        print(delta_t)
+        # print(delta_t)
         if self.limit_type != LimitType.unbounded and self.limit_cell < len(self.limit_arr):
             if reward == self.solution:
                 if self.limit_type == LimitType.time and self.limit_arr[self.limit_cell] >= delta_t:
@@ -173,7 +173,7 @@ class mcts():
             elif self.limit_type == LimitType.time and self.limit_arr[self.limit_cell] > delta_t:
                 self.update_limit_cell(self.root.total_reward)
         self.rollout_visits += visits
-        print(f"reward {reward}, hval {node.state.curr.h_val}")
+        # print(f"reward {reward}, hval {node.state.curr.h_val}")
         self.backpropogate(node, reward)
 
     def selectNode(self, node):
@@ -201,7 +201,7 @@ class mcts():
                 new_node = treeNode(node.state.takeAction(action), node)
                 if not new_node.state.curr.not_valid:
                     node.children[action] = new_node
-                    print(f"added {new_node.state.curr.val}")
+                    #print(f"added {new_node.state.curr.val}")
                     if len(actions) == len(node.children):
                     #if len(actions) == node.state.get_num_explored_valid_children():
                         node.isFullyExpanded = True

@@ -114,7 +114,7 @@ def mknapcb():
 
 
 if __name__ == '__main__':
-    # mknap1()
-    mknapcb()
+    mknap1()
+    #mknapcb()
 
 
