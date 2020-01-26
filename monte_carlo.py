@@ -112,15 +112,18 @@ class mcts():
             timeLimit = time.time() + self.timeLimit / 1000
             while time. time() < timeLimit and self.root.total_reward != self.solution:
                 self.executeRound()
+            self.fill_limit_cell(self.root.total_reward)
             print(f"Best Val {self.root.total_reward}")
 
         elif LimitType(self.limit_type) == LimitType.turn:
             for i in range(self.searchLimit):
-                if self.root.total_reward == self.solution:
-                    break
-                self.executeRound()
                 if self.turn in self.limit_arr:
                     self.update_limit_cell(self.root.total_reward)
+                if self.root.total_reward == self.solution:
+                    self.update_limit_cell(self.solution, id=-1)
+                    break
+                self.executeRound()
+            self.fill_limit_cell(self.solution)
         else:
             i = 0
             while self.root.total_reward != self.solution:
@@ -133,9 +136,18 @@ class mcts():
         print(f"rollout visits {self.rollout_visits}")
         return self.result if self.result[0] != [] else {-1:[self.root.total_reward, self.curr_stamp, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]}
 
-    def update_limit_cell(self, reward):
-        self.result[self.limit_cell] = [reward, self.curr_stamp - self.init_ts, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]
-        self.limit_cell += 1
+    def update_limit_cell(self, reward, id = None):
+        if id is not None:
+            self.result[self.id] = [reward, self.curr_stamp - self.init_ts, self.rollout_visits + self.max_lvl,
+                                            self.rollout_visits + self.total_visits]
+        else:
+            self.result[self.limit_cell] = [reward, self.curr_stamp - self.init_ts, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]
+            self.limit_cell += 1
+
+    def fill_limit_cell(self, reward):
+        for i in range(self.limit_cell,len(self.limit_arr)):
+            self.result[i] = [reward, self.curr_stamp - self.init_ts, self.rollout_visits + self.max_lvl,
+                                            self.rollout_visits + self.total_visits]
 
     def executeRound(self):
         self.turn += 1
@@ -151,8 +163,13 @@ class mcts():
         delta_t = self.curr_stamp - self.init_ts
         print(delta_t)
         if self.limit_type != LimitType.unbounded and self.limit_cell < len(self.limit_arr):
-            if (reward == self.solution and (self.limit_type == LimitType.time and self.limit_arr[self.limit_cell] >= delta_t)):
-                self.update_limit_cell(reward)
+            if reward == self.solution:
+                if self.limit_type == LimitType.time and self.limit_arr[self.limit_cell] >= delta_t:
+                    self.update_limit_cell(reward)
+                    self.fill_limit_cell(reward)
+                else:
+                    self.update_limit_cell(self.root.total_reward)
+                    self.update_limit_cell(reward, id=-1)
             elif self.limit_type == LimitType.time and self.limit_arr[self.limit_cell] > delta_t:
                 self.update_limit_cell(self.root.total_reward)
         self.rollout_visits += visits
