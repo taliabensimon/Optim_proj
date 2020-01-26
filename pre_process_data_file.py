@@ -39,6 +39,7 @@ def mknap1():
 
         assert len(const_coeffs) == int(num_consts)
         const_bound = np.array(problem[j].split(" "), dtype=float)
+        assert len(const_bound) == int(num_consts)
         problems.append(
             (Problem(OptType.MIN, func_coeff, const_coeffs, const_bound, var_bound, func_coeff), opt_sol))
     with open("problems_pickle_v2", "wb") as f:
@@ -74,6 +75,7 @@ def mknapcb():
             for c in content[i].split(" "):
                 if c.isdigit():
                     func_coeff.append(float(c))
+        func_coeff *= -1
             # func_coeff = np.concatenate((func_coeff, np.array(content[i][:-1].strip().replace("  ", " ").replace("\t"," ").split(" "), dtype=float) * -1))
         # i += 1
         assert len(func_coeff) == num_vars
