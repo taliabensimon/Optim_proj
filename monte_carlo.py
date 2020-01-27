@@ -110,7 +110,7 @@ class mcts():
         self.root = treeNode(initialState, None)
         if LimitType(self.limit_type) == LimitType.time:
             timeLimit = time.time() + self.timeLimit / 1000
-            while time. time() < timeLimit and self.root.total_reward != self.solution:
+            while time. time() < timeLimit and self.root.total_reward != self.solution and self.turn < 1000000:
                 self.executeRound()
             self.fill_limit_cell(self.root.total_reward)
             print(f"Best Val {self.root.total_reward}")
@@ -138,7 +138,7 @@ class mcts():
 
     def update_limit_cell(self, reward, id = None):
         if id is not None:
-            self.result[self.id] = [reward, self.curr_stamp - self.init_ts, self.rollout_visits + self.max_lvl,
+            self.result[id] = [reward, self.curr_stamp - self.init_ts, self.rollout_visits + self.max_lvl,
                                             self.rollout_visits + self.total_visits]
         else:
             self.result[self.limit_cell] = [reward, self.curr_stamp - self.init_ts, self.rollout_visits + self.max_lvl, self.rollout_visits + self.total_visits]
