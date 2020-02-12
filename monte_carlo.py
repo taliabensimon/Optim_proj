@@ -179,10 +179,10 @@ class mcts():
     def selectNode(self, node):
         i=0
         self.total_visits += 1
-        for a in node.children.values():
-            if a.state.curr.h_val is not None and a.state.curr.h_val > self.root.total_reward:
-                a.state.curr.set_not_valid()
-                a.total_reward = np.inf
+        # for a in node.children.values():
+        #     if a.state.curr.h_val is not None and a.state.curr.h_val > self.root.total_reward:
+        #         a.state.curr.set_not_valid()
+        #         a.total_reward = np.inf
         while not node.is_terminal():
             i+=1
             self.total_visits += 1
@@ -201,7 +201,7 @@ class mcts():
                 new_node = treeNode(node.state.takeAction(action), node)
                 if not new_node.state.curr.not_valid:
                     node.children[action] = new_node
-                    #print(f"added {new_node.state.curr.val}")
+                    # print(f"added {new_node.state.curr.val}")
                     if len(actions) == len(node.children):
                     #if len(actions) == node.state.get_num_explored_valid_children():
                         node.isFullyExpanded = True
